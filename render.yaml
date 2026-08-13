@@ -1,0 +1,42 @@
+# Render Blueprint — Patana (monorepo)
+# Set root of repo as the service root where possible.
+
+services:
+  - type: web
+    name: patana-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: pnpm install --filter api... && pnpm --filter api exec prisma generate --schema=prisma/schema.prisma && pnpm --filter api build
+    startCommand: pnpm --filter api start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  - type: web
+    name: patana-web
+    runtime: static
+    rootDir: .
+    buildCommand: pnpm install --filter web... && pnpm --filter web build
+    staticPublishPath: apps/web/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false

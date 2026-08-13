@@ -1,0 +1,34 @@
+name: Generate pnpm lockfile
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate lockfile
+        run: pnpm install --lockfile-only
+
+      - name: Commit lockfile
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-generate pnpm lockfile [skip ci]"
+          file_pattern: pnpm-lock.yaml

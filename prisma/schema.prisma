@@ -1,0 +1,741 @@
+// Patana Database Schema - 20 Entities
+// Compatible with Supabase PostgreSQL
+// Generated from Complete Developer Specification v1.0
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../apps/api/src/generated/prisma"
+  previewFeatures = ["queryCompiler", "driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Required for Supabase connection pooling
+}
+
+// ============================================================
+// 1. SELLERS
+// ============================================================
+model Seller {
+  id                        String   @id @default(cuid())
+  fullName                  String   @map("full_name")
+  businessName              String?  @map("business_name")
+  primaryPhone              String   @map("primary_phone")
+  whatsappNumber            String   @unique @map("whatsapp_number")
+  alternativeContact        String?  @map("alternative_contact")
+  emergencyContactName      String?  @map("emergency_contact_name")
+  emergencyContactNumber    String?  @map("emergency_contact_number")
+  locationCity              String   @map("location_city")
+  locationArea              String?  @map("location_area")
+  profilePhotoUrl           String?  @map("profile_photo_url")
+  bio                       String?
+  category                  String?
+  subcategory               String?
+  listingType               ListingType @map("listing_type")
+  operatingHours            String?  @map("operating_hours")
+  liveStatus                LiveStatus @default(ONLINE) @map("live_status")
+  languagesSpoken           String[] @default([]) @map("languages_spoken")
+  customOrders              Boolean  @default(false) @map("custom_orders")
+  wholesaleAvailable        Boolean  @default(false) @map("wholesale_available")
+  deliveryAvailable         Boolean  @default(false) @map("delivery_available")
+  deliveryAreas             String[] @default([]) @map("delivery_areas")
+  returnPolicy              String?  @map("return_policy")
+  instagramUrl              String?  @map("instagram_url")
+  tiktokUrl                 String?  @map("tiktok_url")
+  socialMediaLinks          Json?    @map("social_media_links")
+  trustScore                Int      @default(100) @map("trust_score")
+  verificationStatus        VerificationStatus @default(PENDING) @map("verification_status")
+  accountStatus             AccountStatus @default(ACTIVE) @map("account_status")
+  memberSince               DateTime @default(now()) @map("member_since")
+  referenceNumber           String   @unique @map("reference_number")
+  subscriptionTier          SubscriptionTier? @map("subscription_tier")
+  renewalDate               DateTime? @map("renewal_date")
+  newSellerBoostActive      Boolean  @default(false) @map("new_seller_boost_active")
+  boostExpiryDate           DateTime? @map("boost_expiry_date")
+  transactionCount          Int      @default(0) @map("transaction_count")
+  repeatBuyerCount          Int      @default(0) @map("repeat_buyer_count")
+  featuredProductId         String?  @map("featured_product_id")
+  priceRangeIndicator       String?  @map("price_range_indicator")
+  specialisationTags        String[] @default([]) @map("specialisation_tags")
+  turnaroundTime            String?  @map("turnaround_time")
+  paymentMethodsAccepted    String[] @default([]) @map("payment_methods_accepted")
+  responseTimeAverage       Float?   @map("response_time_average")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  products                  Product[]
+  reviews                   Review[]
+  trustScoreHistory         TrustScoreHistory[]
+  complaints                Complaint[]
+  activationKeys            ActivationKey[]
+  paymentRecords            PaymentRecord[]
+  warnings                  Warning[]
+  transactionConfirmations  TransactionConfirmation[]
+  featuredListings          FeaturedListing[]
+  verificationDocuments     VerificationDocument[]
+  onboardingApplication     OnboardingApplication?
+
+  @@map("sellers")
+  @@index([whatsappNumber])
+  @@index([referenceNumber])
+  @@index([accountStatus])
+  @@index([verificationStatus])
+}
+
+enum ListingType {
+  PRODUCTS
+  SERVICES
+  ONE_TIME
+}
+
+enum LiveStatus {
+  ONLINE
+  AWAY
+  BUSY
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  OFFLINE
+  GRACE_PERIOD
+}
+
+enum SubscriptionTier {
+  STARTER
+  GROWTH
+  PRO
+  ONE_TIME
+}
+
+// ============================================================
+// 2. PRODUCTS
+// ============================================================
+model Product {
+  id                    String   @id @default(cuid())
+  sellerId              String   @map("seller_id")
+  productName           String   @map("product_name")
+  description           String?
+  price                 Decimal? @db.Decimal(12, 2)
+  priceMin              Decimal? @map("price_min") @db.Decimal(12, 2)
+  priceMax              Decimal? @map("price_max") @db.Decimal(12, 2)
+  priceType             PriceType @default(FIXED) @map("price_type")
+  category              String
+  subcategory           String?
+  listingType           ProductListingType @map("listing_type")
+  photoUrls             String[] @default([]) @map("photo_urls")
+  availabilityStatus    AvailabilityStatus @default(AVAILABLE) @map("availability_status")
+  customOrderAvailable  Boolean  @default(false) @map("custom_order_available")
+  wholesaleAvailable    Boolean  @default(false) @map("wholesale_available")
+  isFeatured            Boolean  @default(false) @map("is_featured")
+  dateListed            DateTime @default(now()) @map("date_listed")
+  viewsCount            Int      @default(0) @map("views_count")
+  whatsappTapsCount     Int      @default(0) @map("whatsapp_taps_count")
+  // Property fields
+  landTitleUrl          String?  @map("land_title_url")
+  plotNumber            String?  @map("plot_number")
+  landSize              String?  @map("land_size")
+  district              String?
+  gpsCoordinates        String?  @map("gps_coordinates")
+  // Vehicle fields
+  vehicleMake           String?  @map("vehicle_make")
+  vehicleModel          String?  @map("vehicle_model")
+  vehicleYear           Int?     @map("vehicle_year")
+  vehicleMileage        Int?     @map("vehicle_mileage")
+  vehicleCondition      VehicleCondition? @map("vehicle_condition")
+  logbookAvailable      Boolean? @map("logbook_available")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  seller                Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  transactionConfirmations TransactionConfirmation[]
+
+  @@map("products")
+  @@index([sellerId])
+  @@index([category, subcategory])
+  @@index([availabilityStatus])
+  @@index([isFeatured])
+  @@index([dateListed])
+}
+
+enum PriceType {
+  FIXED
+  RANGE
+  NEGOTIABLE
+}
+
+enum ProductListingType {
+  PRODUCT
+  SERVICE
+  PROPERTY
+  VEHICLE
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  OUT_OF_STOCK
+  SOLD
+}
+
+enum VehicleCondition {
+  NEW
+  USED
+  FOR_PARTS
+}
+
+// ============================================================
+// 3. CATEGORIES
+// ============================================================
+model Category {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  type          CategoryType
+  iconUrl       String?  @map("icon_url")
+  displayOrder  Int      @default(0) @map("display_order")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  subcategories Subcategory[]
+
+  @@map("categories")
+  @@index([type])
+  @@index([displayOrder])
+}
+
+enum CategoryType {
+  PRODUCTS
+  SERVICES
+  PROPERTY
+}
+
+// ============================================================
+// 4. SUBCATEGORIES
+// ============================================================
+model Subcategory {
+  id            String   @id @default(cuid())
+  categoryId    String   @map("category_id")
+  name          String
+  displayOrder  Int      @default(0) @map("display_order")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("subcategories")
+  @@unique([categoryId, name])
+  @@index([categoryId])
+}
+
+// ============================================================
+// 5. REVIEWS
+// ============================================================
+model Review {
+  id                    String   @id @default(cuid())
+  sellerId              String   @map("seller_id")
+  transactionId         String?  @unique @map("transaction_id")
+  buyerWhatsapp         String   @map("buyer_whatsapp")
+  starRating            Int      @map("star_rating") // 1-5
+  writtenReview         String?  @map("written_review") // max 200 chars
+  categoryQuality       Int?     @map("category_quality")
+  categoryCommunication Int?     @map("category_communication")
+  categoryValue         Int?     @map("category_value")
+  categorySpeed         Int?     @map("category_speed")
+  verifiedTransaction   Boolean  @default(false) @map("verified_transaction")
+  dateSubmitted         DateTime @default(now()) @map("date_submitted")
+  sellerResponse        String?  @map("seller_response")
+  sellerResponseDate    DateTime? @map("seller_response_date")
+  isFlagged             Boolean  @default(false) @map("is_flagged")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller                Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  transaction           TransactionConfirmation? @relation(fields: [transactionId], references: [id])
+
+  @@map("reviews")
+  @@index([sellerId])
+  @@index([verifiedTransaction])
+}
+
+// ============================================================
+// 6. TRUST_SCORE_HISTORY
+// ============================================================
+model TrustScoreHistory {
+  id                String   @id @default(cuid())
+  sellerId          String   @map("seller_id")
+  eventType         TrustEventType @map("event_type")
+  pointsChange      Int      @map("points_change")
+  occurrenceCount   Int      @default(1) @map("occurrence_count")
+  scoreBefore       Int      @map("score_before")
+  scoreAfter        Int      @map("score_after")
+  dateRecorded      DateTime @default(now()) @map("date_recorded")
+  adminNotes        String?  @map("admin_notes")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller            Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("trust_score_history")
+  @@index([sellerId])
+  @@index([eventType])
+}
+
+enum TrustEventType {
+  COMPLAINT
+  WARNING
+  SLOW_RESPONSE
+  UNRESOLVED_COMPLAINT
+  POSITIVE_REVIEW
+  CLEAN_PERIOD
+  FAST_RESPONSE
+  LONG_TENURE
+  COMPLAINT_RESOLVED
+  TRAINING_ACKNOWLEDGED
+}
+
+// ============================================================
+// 7. COMPLAINTS
+// ============================================================
+model Complaint {
+  id                String   @id @default(cuid())
+  referenceNumber   String   @unique @map("reference_number")
+  buyerWhatsapp     String   @map("buyer_whatsapp")
+  sellerId          String   @map("seller_id")
+  complaintCategory ComplaintCategory @map("complaint_category")
+  description       String
+  evidenceUrls      String[] @default([]) @map("evidence_urls")
+  status            ComplaintStatus @default(PENDING)
+  outcome           ComplaintOutcome @default(PENDING)
+  dateSubmitted     DateTime @default(now()) @map("date_submitted")
+  dateResolved      DateTime? @map("date_resolved")
+  adminNotes        String?  @map("admin_notes")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller            Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("complaints")
+  @@index([sellerId])
+  @@index([status])
+  @@index([referenceNumber])
+}
+
+enum ComplaintCategory {
+  PRODUCT_NOT_AS_DESCRIBED
+  SELLER_NOT_RESPONDING
+  SERVICE_NOT_DELIVERED
+  FAKE_PRODUCT
+  RUDE_BEHAVIOUR
+  OTHER
+}
+
+enum ComplaintStatus {
+  PENDING
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum ComplaintOutcome {
+  WARNING
+  SUSPENSION
+  CLEARED
+  BOTH_AT_FAULT
+  PENDING
+}
+
+// ============================================================
+// 8. ACTIVATION_KEYS
+// ============================================================
+model ActivationKey {
+  id          String   @id @default(cuid())
+  sellerId    String   @map("seller_id")
+  keyValue    String   @unique @map("key_value")
+  status      KeyStatus @default(ACTIVE)
+  createdAt   DateTime @default(now()) @map("created_at")
+  expiresAt   DateTime @map("expires_at")
+  usedAt      DateTime? @map("used_at")
+
+  // Relations
+  seller      Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("activation_keys")
+  @@index([sellerId])
+  @@index([keyValue])
+  @@index([status])
+}
+
+enum KeyStatus {
+  ACTIVE
+  USED
+  EXPIRED
+}
+
+// ============================================================
+// 9. PAYMENT_RECORDS
+// ============================================================
+model PaymentRecord {
+  id                  String   @id @default(cuid())
+  sellerId            String   @map("seller_id")
+  amountPaid          Decimal  @map("amount_paid") @db.Decimal(12, 2)
+  currency            String   @default("UGX")
+  momoTransactionId   String?  @unique @map("momo_transaction_id")
+  paymentScreenshotUrl String? @map("payment_screenshot_url")
+  paymentDate         DateTime @default(now()) @map("payment_date")
+  subscriptionTier    SubscriptionTier? @map("subscription_tier")
+  periodStart         DateTime? @map("period_start")
+  periodEnd           DateTime? @map("period_end")
+  status              PaymentStatus @default(PENDING)
+  adminVerified       Boolean  @default(false) @map("admin_verified")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller              Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("payment_records")
+  @@index([sellerId])
+  @@index([status])
+  @@index([momoTransactionId])
+}
+
+enum PaymentStatus {
+  CONFIRMED
+  PENDING
+  FAILED
+}
+
+// ============================================================
+// 10. WARNINGS
+// ============================================================
+model Warning {
+  id            String   @id @default(cuid())
+  sellerId      String   @map("seller_id")
+  warningType   WarningType @map("warning_type")
+  warningCount  Int      @default(1) @map("warning_count")
+  description   String?
+  dateIssued    DateTime @default(now()) @map("date_issued")
+  adminId       String?  @map("admin_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller        Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  admin         Admin?   @relation(fields: [adminId], references: [id])
+
+  @@map("warnings")
+  @@index([sellerId])
+  @@index([warningType])
+}
+
+enum WarningType {
+  COMPLAINT
+  SLOW_RESPONSE
+  PLATFORM_VIOLATION
+  FAKE_CONTENT
+}
+
+// ============================================================
+// 11. PLATFORM_STATISTICS
+// ============================================================
+model PlatformStatistics {
+  id                        String   @id @default(cuid())
+  totalVerifiedSellers      Int      @default(0) @map("total_verified_sellers")
+  totalActiveListings       Int      @default(0) @map("total_active_listings")
+  totalWhatsappTapsAlltime  Int      @default(0) @map("total_whatsapp_taps_alltime")
+  totalCategories           Int      @default(0) @map("total_categories")
+  totalSuccessfulTransactions Int    @default(0) @map("total_successful_transactions")
+  lastUpdated               DateTime @default(now()) @map("last_updated")
+
+  @@map("platform_statistics")
+}
+
+// ============================================================
+// 12. ADMINS
+// ============================================================
+model Admin {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  role          AdminRole @default(ADMIN)
+  lastLogin     DateTime? @map("last_login")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  warnings      Warning[]
+  onboardingApplications OnboardingApplication[]
+
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
+
+// ============================================================
+// 13. ONBOARDING_APPLICATIONS
+// ============================================================
+model OnboardingApplication {
+  id                        String   @id @default(cuid())
+  referenceNumber           String   @unique @map("reference_number")
+  listingType               ListingType @map("listing_type")
+  fullName                  String   @map("full_name")
+  whatsappNumber            String   @map("whatsapp_number")
+  primaryPhone              String   @map("primary_phone")
+  location                  String
+  businessName              String?  @map("business_name")
+  businessDescription       String?  @map("business_description")
+  category                  String?
+  subcategory               String?
+  nationalIdNumber          String   @map("national_id_number")
+  yearsInOperation          Int?     @map("years_in_operation")
+  previousPlatformExperience String? @map("previous_platform_experience")
+  customOrders              Boolean  @default(false) @map("custom_orders")
+  wholesale                 Boolean  @default(false)
+  deliveryAvailable         Boolean  @default(false) @map("delivery_available")
+  targetCustomers           TargetCustomers? @map("target_customers")
+  returnPolicy              String?  @map("return_policy")
+  languagesSpoken           String[] @default([]) @map("languages_spoken")
+  instagramUrl              String?  @map("instagram_url")
+  tiktokUrl                 String?  @map("tiktok_url")
+  applicationStatus         ApplicationStatus @default(SUBMITTED) @map("application_status")
+  rejectionReason           String?  @map("rejection_reason")
+  idCheckNotes              String?  @map("id_check_notes")
+  socialCheckNotes          String?  @map("social_check_notes")
+  businessPhotosNotes       String?  @map("business_photos_notes")
+  dateSubmitted             DateTime @default(now()) @map("date_submitted")
+  dateDecided               DateTime? @map("date_decided")
+  adminId                   String?  @map("admin_id")
+  sellerId                  String?  @unique @map("seller_id")
+  createdAt                 DateTime @default(now()) @map("created_at")
+
+  // Relations
+  admin                     Admin?   @relation(fields: [adminId], references: [id])
+  seller                    Seller?  @relation(fields: [sellerId], references: [id])
+  verificationDocuments     VerificationDocument[]
+
+  @@map("onboarding_applications")
+  @@index([referenceNumber])
+  @@index([applicationStatus])
+  @@index([whatsappNumber])
+}
+
+enum TargetCustomers {
+  INDIVIDUALS
+  BUSINESSES
+  BOTH
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+// ============================================================
+// 14. BLACKLIST
+// ============================================================
+model Blacklist {
+  id                String   @id @default(cuid())
+  phoneNumber       String?  @map("phone_number")
+  nationalIdNumber  String?  @map("national_id_number")
+  fullName          String?  @map("full_name")
+  reason            BlacklistReason
+  dateBlacklisted   DateTime @default(now()) @map("date_blacklisted")
+  adminNotes        String?  @map("admin_notes")
+  source            BlacklistSource
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("blacklist")
+  @@index([phoneNumber])
+  @@index([nationalIdNumber])
+}
+
+enum BlacklistReason {
+  FRAUD
+  SCAM
+  FALSE_INFORMATION
+  VIOLATION
+  REPEATED_COMPLAINTS
+}
+
+enum BlacklistSource {
+  SELLER_FRAUD
+  BUYER_ABUSE
+  APPLICATION_FRAUD
+}
+
+// ============================================================
+// 15. TRANSACTION_CONFIRMATIONS
+// ============================================================
+model TransactionConfirmation {
+  id                    String   @id @default(cuid())
+  sellerId              String   @map("seller_id")
+  productId             String   @map("product_id")
+  buyerWhatsapp         String   @map("buyer_whatsapp")
+  dateConfirmedBySeller DateTime @default(now()) @map("date_confirmed_by_seller")
+  reviewRequestSent     Boolean  @default(false) @map("review_request_sent")
+  reviewRequestDate     DateTime? @map("review_request_date")
+  reviewCompleted       Boolean  @default(false) @map("review_completed")
+  reviewId              String?  @map("review_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller                Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  product               Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  review                Review?
+
+  @@map("transaction_confirmations")
+  @@index([sellerId])
+  @@index([productId])
+}
+
+// ============================================================
+// 16. NOTIFICATIONS_LOG
+// ============================================================
+model NotificationsLog {
+  id                String   @id @default(cuid())
+  recipientType     RecipientType @map("recipient_type")
+  recipientWhatsapp String   @map("recipient_whatsapp")
+  notificationType  NotificationType @map("notification_type")
+  messageContent    String   @map("message_content")
+  deliveryStatus    DeliveryStatus @default(SENT) @map("delivery_status")
+  dateSent          DateTime @default(now()) @map("date_sent")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("notifications_log")
+  @@index([recipientWhatsapp])
+  @@index([notificationType])
+}
+
+enum RecipientType {
+  SELLER
+  BUYER
+  ADMIN
+}
+
+enum NotificationType {
+  RENEWAL_REMINDER
+  APPROVAL
+  REJECTION
+  COMPLAINT_UPDATE
+  TRUST_SCORE_ALERT
+  OTP
+  REVIEW_REQUEST
+  KEY_DELIVERY
+  ANNOUNCEMENT
+}
+
+enum DeliveryStatus {
+  SENT
+  DELIVERED
+  FAILED
+}
+
+// ============================================================
+// 17. OTP_TOKENS
+// ============================================================
+model OtpToken {
+  id              String   @id @default(cuid())
+  whatsappNumber  String   @map("whatsapp_number")
+  otpCode         String   @map("otp_code")
+  createdAt       DateTime @default(now()) @map("created_at")
+  expiresAt       DateTime @map("expires_at")
+  used            Boolean  @default(false)
+  usedAt          DateTime? @map("used_at")
+
+  @@map("otp_tokens")
+  @@index([whatsappNumber])
+  @@index([expiresAt])
+}
+
+// ============================================================
+// 18. FEATURED_LISTINGS
+// ============================================================
+model FeaturedListing {
+  id          String   @id @default(cuid())
+  sellerId    String   @map("seller_id")
+  category    String
+  amountPaid  Decimal  @map("amount_paid") @db.Decimal(12, 2)
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  status      FeaturedStatus @default(ACTIVE)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller      Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("featured_listings")
+  @@index([sellerId])
+  @@index([category])
+  @@index([status])
+}
+
+enum FeaturedStatus {
+  ACTIVE
+  EXPIRED
+}
+
+// ============================================================
+// 19. VERIFICATION_DOCUMENTS
+// ============================================================
+model VerificationDocument {
+  id                  String   @id @default(cuid())
+  sellerId            String?  @map("seller_id")
+  applicationId       String?  @map("application_id")
+  documentType        DocumentType @map("document_type")
+  documentUrl         String   @map("document_url")
+  verificationStatus  VerificationStatus @default(PENDING) @map("verification_status")
+  adminNotes          String?  @map("admin_notes")
+  uploadDate          DateTime @default(now()) @map("upload_date")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  // Relations
+  seller              Seller?  @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  application         OnboardingApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("verification_documents")
+  @@index([sellerId])
+  @@index([applicationId])
+  @@index([documentType])
+}
+
+enum DocumentType {
+  ID_FRONT
+  ID_BACK
+  SELFIE_WITH_ID
+  BUSINESS_PHOTO_1
+  BUSINESS_PHOTO_2
+  BUSINESS_PHOTO_3
+}
+
+// ============================================================
+// 20. DAILY_PLATFORM_SNAPSHOTS
+// ============================================================
+model DailyPlatformSnapshot {
+  id                    String   @id @default(cuid())
+  snapshotDate          DateTime @unique @map("snapshot_date") @db.Date
+  totalActiveSellers    Int      @default(0) @map("total_active_sellers")
+  totalListings         Int      @default(0) @map("total_listings")
+  whatsappTapsToday     Int      @default(0) @map("whatsapp_taps_today")
+  newApplicationsToday  Int      @default(0) @map("new_applications_today")
+  revenueToday          Decimal  @default(0) @map("revenue_today") @db.Decimal(12, 2)
+  complaintsToday       Int      @default(0) @map("complaints_today")
+  newSellersToday       Int      @default(0) @map("new_sellers_today")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@map("daily_platform_snapshots")
+  @@index([snapshotDate])
+}
