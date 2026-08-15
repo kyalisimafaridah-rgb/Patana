@@ -11,6 +11,8 @@ import activationRoutes from './routes/activation.js';
 import publicRoutes from './routes/public.js';
 import sellerRoutes from './routes/seller.js';
 import reviewRoutes from './routes/reviews.js';
+import prisma from './config/prisma.js';
+import { hashPassword } from './utils/password.js';
 
 // Fail fast in production without JWT_SECRET
 if (process.env.NODE_ENV === 'production') {
@@ -59,6 +61,39 @@ app.get('/health', (_req, res) => {
 
 app.get('/api/v1', (_req, res) => {
   res.json({ message: 'Patana API v1', version: '1.0.1' });
+});
+
+// One-time bootstrap: creates the first SUPER_ADMIN. Self-disables once
+// any admin exists, and requires a secret header, so it's safe to leave
+// deployed rather than needing an immediate follow-up removal.
+app.post('/api/v1/bootstrap-admin', async (req, res) => {
+  try {
+    const secret = process.env.BOOTSTRAP_SECRET;
+    if (!secret || req.headers['x-bootstrap-secret'] !== secret) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+    const existingCount = await prisma.admin.count();
+    if (existingCount > 0) {
+      return res.status(403).json({ error: 'Admin already exists; bootstrap disabled' });
+    }
+    const { email, password, name } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password required' });
+    }
+    const passwordHash = await hashPassword(password);
+    const admin = await prisma.admin.create({
+      data: {
+        name: name || 'Patana Admin',
+        email: String(email).toLowerCase(),
+        passwordHash,
+        role: 'SUPER_ADMIN',
+      },
+    });
+    res.json({ success: true, email: admin.email, role: admin.role });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal error' });
+  }
 });
 
 app.use('/api/v1/auth', authRoutes);
