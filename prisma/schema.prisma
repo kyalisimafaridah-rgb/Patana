@@ -3,9 +3,8 @@
 // Generated from Complete Developer Specification v1.0
 
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../apps/api/src/generated/prisma"
-  previewFeatures = ["queryCompiler", "driverAdapters"]
+  provider = "prisma-client-js"
+  output   = "../apps/api/src/generated/prisma"
 }
 
 datasource db {
