@@ -5,17 +5,42 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    /* Prevent the rubber-band bounce that makes a page feel like a browser tab */
+    overscroll-behavior-y: none;
+    height: 100%;
   }
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
+    height: 100%;
+    overscroll-behavior-y: none;
+    /* Remove the grey tap-highlight flash on Android/iOS */
+    -webkit-tap-highlight-color: transparent;
+    /* Respect the notch / home-indicator safe areas when installed standalone */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    /* Prevent accidental text selection on tap-and-hold, like a native app */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Text content should still be selectable — copy/paste an address, a price, etc */
+  p, span, h1, h2, h3, h4, h5, h6, li, input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input, textarea, select, button {
+    /* iOS zooms in on focus if font-size is under 16px — keep inputs at 16px */
+    font-size: 16px;
+  }
+  #root {
+    min-height: 100%;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-patana-600 hover:bg-patana-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors;
+    @apply bg-patana-600 hover:bg-patana-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors active:scale-[0.97];
   }
   .btn-whatsapp {
-    @apply bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all;
+    @apply bg-[#25D366] hover:bg-[#20BD5A] text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all active:scale-[0.97];
   }
 }
