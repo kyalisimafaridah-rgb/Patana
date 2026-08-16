@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import SellWithUsPage from './pages/SellWithUsPage';
@@ -12,10 +13,14 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import SellerLoginPage from './pages/seller/SellerLoginPage';
 import SellerDashboardPage from './pages/seller/SellerDashboardPage';
 import AddListingPage from './pages/seller/AddListingPage';
+import OnboardingTour, { shouldShowOnboarding } from './components/OnboardingTour';
 
 function App() {
+  const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
+
   return (
     <BrowserRouter>
+      {showOnboarding && <OnboardingTour onDone={() => setShowOnboarding(false)} />}
       <Routes>
         {/* Public */}
         <Route path="/" element={<HomePage />} />
