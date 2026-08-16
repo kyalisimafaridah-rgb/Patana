@@ -1,8 +1,10 @@
+import { Link } from 'react-router-dom';
+
 export default function SellWithUsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-12">
-        <a href="/" className="text-sm text-patana-600 hover:underline mb-6 inline-block">← Back to home</a>
+        <Link to="/" className="text-sm text-patana-600 hover:underline mb-6 inline-block">← Back to home</Link>
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Sell With Patana</h1>
         <p className="text-gray-600 mb-8">
           Join Uganda's verified marketplace directory. Reach real buyers on WhatsApp.
@@ -16,9 +18,9 @@ export default function SellWithUsPage() {
             <li>• Fair visibility — no paid ranking games</li>
           </ul>
         </div>
-        <a href="/apply" className="btn-primary inline-block w-full text-center py-3">
+        <Link to="/apply" className="btn-primary inline-block w-full text-center py-3">
           Apply Now
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 
 export default function ApplicationFormPage() {
@@ -51,7 +52,7 @@ export default function ApplicationFormPage() {
           <p className="text-sm text-gray-500 mb-6">
             We will review within 24 hours and contact you on WhatsApp.
           </p>
-          <a href="/" className="btn-primary inline-block">Back to Home</a>
+          <Link to="/" className="btn-primary inline-block">Back to Home</Link>
         </div>
       </div>
     );
@@ -60,9 +61,9 @@ export default function ApplicationFormPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-xl mx-auto px-4 py-10">
-        <a href="/sell" className="text-sm text-patana-600 hover:underline mb-6 inline-block">
+        <Link to="/sell" className="text-sm text-patana-600 hover:underline mb-6 inline-block">
           ← Back
-        </a>
+        </Link>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Seller Application</h1>
         <p className="text-gray-500 text-sm mb-8">
           Complete the form. Every application is reviewed within 24 hours.
